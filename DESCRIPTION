@@ -15,14 +15,14 @@ LazyData: true
 NeedsCompilation: yes
 Roxygen: list(markdown = TRUE)
 Depends: R (>= 2.10)
-Imports: V8,
-         sf, 
-         magrittr,
-         jsonlite,
-         dplyr,
-         Rcpp
+Imports: 
+  Rcpp,
+  sfheaders
 RoxygenNote: 7.1.0
-Suggests: testthat
+Suggests: 
+  dplyr, 
+  sf, 
+  testthat
 LinkingTo: Rcpp
 URL: https://joelgombin.github.io/concaveman, http://www.github.com/joelgombin/concaveman
 BugReports: http://www.github.com/joelgombin/concaveman/issues

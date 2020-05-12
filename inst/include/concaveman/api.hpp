@@ -114,8 +114,11 @@ Rcpp::DataFrame concaveman(
 }
 
 Rcpp::DataFrame concaveman(
-        SEXP& xy, Rcpp::IntegerVector hull_in,
-        const double concavity, const double length_threshold) {
+        SEXP& xy, 
+        Rcpp::IntegerVector& hull_in,
+        const double concavity, 
+        const double length_threshold
+    ) {
     
     switch( TYPEOF( xy ) ) {
     case INTSXP: {
