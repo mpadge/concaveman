@@ -16,50 +16,31 @@
 #' plot(polygons, add = TRUE)
 #'
 #' @export
-#' @importFrom magrittr "%>%"
-
 concaveman <- function(points, concavity, length_threshold) UseMethod("concaveman", points)
 
 #' @export
 #' @rdname concaveman
 concaveman.matrix <- function(points, concavity = 2, length_threshold = 0) {
-  ctx <- V8::v8()
-  ctx$source(system.file("js", "concaveman-bundle.js", package = "concaveman")) # local version
-  workhorse <- function(points, concavity, length_threshold) {
-    jscode <- sprintf(
-      "var points = %s; var polygon = concaveman(points, concavity = %s, lengthThreshold = %s);",
-      jsonlite::toJSON(points, dataframe = 'values'),
-      concavity,
-      length_threshold
-    )
-    ctx$eval(jscode)
-    df <- as.matrix(as.data.frame(ctx$get('polygon')))
-    df
-  }
-  workhorse(points, concavity, length_threshold)
-
+  index <- grDevices::chull (points)
+  index <- c (index, index [1])
+  rcpp_concaveman (points, index - 1, concavity, length_threshold)
 }
 
 #' @export
 #' @rdname concaveman
 concaveman.sf <- function(points, concavity = 2, length_threshold = 0) {
 
-  points %>%
-    dplyr::summarise(polygons =
-                concaveman(sf::st_coordinates(.), concavity, length_threshold) %>%
-                  as.matrix() %>%
-                  list %>%
-                  sf::st_polygon() %>%
-                  sf::st_sfc(crs = sf::st_crs(points))
-              )
+  geom_col <- attr( points, "sf_column" )
+  geom <- points[[ geom_col ]]
+  crs <- attributes( points[["geometry"]] )[["crs"]]
+  
+  df <- sfheaders::sf_to_df( points )  ## guaranteed to return x & y columns
+  m <- as.matrix( df[, c("x","y") ] )
+  res <- concaveman( m, concavity, length_threshold )
+  
+  sf <- sfheaders::sf_polygon(obj = res, x = "x", y = "y")
+  
+  attr( sf$geometry, "crs" ) <- crs
+  return( sf )
 }
 
-#' concaveman_rcpp
-#'
-#' @export
-#' @rdname concaveman_rcpp
-concaveman_rcpp <- function (xy, concavity = 2, length_threshold = 0) {
-    index <- grDevices::chull (xy)
-    index <- c (index, index [1])
-    rcpp_concaveman_mat (xy, index - 1, concavity, length_threshold)
-}
