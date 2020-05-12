@@ -75,7 +75,7 @@ namespace traits {
 
 #include "concaveman.h"
 
-typedef double T;
+typedef double T;   // TODO: does this NEED to be double? or can it follow RTYPE ?
 typedef std::array <T, 2> Point;
 typedef std::vector< Point > Points;
 
@@ -97,8 +97,11 @@ Rcpp::DataFrame concaveman(
     auto concave_points = concaveman::concaveman <T, 16> (points, hull,
             concavity, length_threshold);
 
+    // TODO: template to Rcpp::Vector< RTYPE > ?
     Rcpp::NumericVector xout (concave_points.size ()),
         yout (concave_points.size ());
+    
+    // TODO: Rcpp::wrap() the result to a data.frame? 
     for (int i = 0; i < concave_points.size (); i++)
     {
         xout (i) = concave_points [i] [0];
